@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>專案待辦事項</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #58a6ff, #bc8cff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .stats {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: #8b949e;
+  }
+
+  .stats span b {
+    color: #58a6ff;
+  }
+
+  /* 新增專案 */
+  .add-project-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .add-project-bar input {
+    flex: 1;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #e6edf3;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .add-project-bar input:focus { border-color: #58a6ff; }
+
+  .btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .btn:active { transform: scale(0.97); }
+  .btn:hover { opacity: 0.85; }
+
+  .btn-primary { background: #238636; color: #fff; }
+  .btn-danger  { background: #da3633; color: #fff; }
+  .btn-ghost   { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+
+  /* 篩選列 */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #30363d;
+    background: transparent;
+    color: #8b949e;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn.active, .filter-btn:hover {
+    background: #58a6ff22;
+    border-color: #58a6ff;
+    color: #58a6ff;
+  }
+
+  /* 專案卡片 */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .project-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .project-card:hover { border-color: #58a6ff55; }
+
+  .project-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #21262d;
+    gap: 8px;
+  }
+
+  .project-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .project-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .project-name {
+    font-weight: 600;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .project-progress {
+    font-size: 12px;
+    color: #8b949e;
+    flex-shrink: 0;
+  }
+
+  .project-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #8b949e;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .icon-btn:hover { background: #21262d; color: #e6edf3; }
+
+  .progress-bar {
+    height: 3px;
+    background: #21262d;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* 待辦事項 */
+  .todo-list {
+    padding: 8px 12px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .todo-list::-webkit-scrollbar { width: 4px; }
+  .todo-list::-webkit-scrollbar-track { background: transparent; }
+  .todo-list::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+
+  .todo-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 4px;
+    border-radius: 6px;
+    transition: background 0.15s;
+    group: true;
+  }
+
+  .todo-item:hover { background: #21262d; }
+
+  .todo-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #238636;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .todo-text {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.4;
+    cursor: pointer;
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  .todo-text.done {
+    text-decoration: line-through;
+    color: #484f58;
+  }
+
+  .todo-priority {
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+
+  .p-high   { background: #da363322; color: #f85149; border: 1px solid #da363344; }
+  .p-medium { background: #d2960022; color: #d29600; border: 1px solid #d2960044; }
+  .p-low    { background: #23863622; color: #3fb950; border: 1px solid #23863644; }
+
+  .todo-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #30363d;
+    font-size: 14px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .todo-item:hover .todo-delete { color: #f85149; }
+
+  /* 新增待辦 */
+  .add-todo-row {
+    display: flex;
+    gap: 6px;
+    padding: 10px 12px;
+    border-top: 1px solid #21262d;
+    align-items: center;
+  }
+
+  .add-todo-row input[type="text"] {
+    flex: 1;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 7px 10px;
+    color: #e6edf3;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 0;
+  }
+
+  .add-todo-row input:focus { border-color: #58a6ff; }
+
+  .add-todo-row select {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 7px 6px;
+    color: #8b949e;
+    font-size: 12px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .add-todo-row .btn-add-todo {
+    padding: 7px 12px;
+    background: #238636;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+  }
+
+  .add-todo-row .btn-add-todo:hover { opacity: 0.85; }
+
+  .empty-state {
+    text-align: center;
+    padding: 20px;
+    color: #484f58;
+    font-size: 13px;
+  }
+
+  /* 顏色選擇 */
+  .color-picker {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .color-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .color-dot:hover, .color-dot.selected { border-color: #fff; transform: scale(1.2); }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #00000088;
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 24px;
+    width: 380px;
+    max-width: 90vw;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .modal h3 { margin-bottom: 16px; font-size: 16px; }
+
+  .modal input {
+    width: 100%;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #e6edf3;
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 14px;
+    transition: border-color 0.2s;
+  }
+
+  .modal input:focus { border-color: #58a6ff; }
+
+  .modal-label { font-size: 13px; color: #8b949e; margin-bottom: 8px; display: block; }
+
+  .modal-footer {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+
+  /* 搜尋 */
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 240px;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 8px 12px 8px 32px;
+    color: #e6edf3;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-wrap input:focus { border-color: #58a6ff; }
+
+  .search-wrap::before {
+    content: "🔍";
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    pointer-events: none;
+  }
+
+  .no-projects {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: #484f58;
+  }
+
+  .no-projects span { font-size: 48px; display: block; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📋 專案待辦事項</h1>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="搜尋待辦..." oninput="renderAll()">
+    </div>
+    <div class="stats">
+      <span>專案 <b id="statProjects">0</b></span>
+      <span>待辦 <b id="statTotal">0</b></span>
+      <span>完成 <b id="statDone">0</b></span>
+    </div>
+  </div>
+</header>
+
+<!-- 篩選列 -->
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="setFilter('all', this)">全部</button>
+  <button class="filter-btn" onclick="setFilter('active', this)">未完成</button>
+  <button class="filter-btn" onclick="setFilter('done', this)">已完成</button>
+  <button class="filter-btn" onclick="setFilter('high', this)">🔴 高優先</button>
+  <button class="filter-btn" onclick="setFilter('medium', this)">🟡 中優先</button>
+  <button class="filter-btn" onclick="setFilter('low', this)">🟢 低優先</button>
+</div>
+
+<!-- 新增專案 -->
+<div class="add-project-bar">
+  <input type="text" id="newProjectName" placeholder="新增專案名稱..." onkeydown="if(event.key==='Enter') addProject()">
+  <button class="btn btn-primary" onclick="addProject()">＋ 新增專案</button>
+</div>
+
+<!-- 專案列表 -->
+<div class="projects-grid" id="projectsGrid"></div>
+
+<!-- Modal：編輯專案 -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>✏️ 編輯專案</h3>
+    <label class="modal-label">專案名稱</label>
+    <input type="text" id="editProjectName" placeholder="專案名稱">
+    <label class="modal-label">顏色</label>
+    <div class="color-picker" id="colorPicker"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveProject()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const COLORS = ['#58a6ff','#bc8cff','#3fb950','#d29600','#f85149','#ff7b72','#79c0ff','#56d364'];
+  let projects = JSON.parse(localStorage.getItem('todo-projects') || '[]');
+  let currentFilter = 'all';
+  let editingProjectId = null;
+  let selectedColor = COLORS[0];
+
+  function save() {
+    localStorage.setItem('todo-projects', JSON.stringify(projects));
+  }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+  }
+
+  function addProject() {
+    const name = document.getElementById('newProjectName').value.trim();
+    if (!name) return;
+    projects.push({ id: uid(), name, color: COLORS[projects.length % COLORS.length], todos: [] });
+    document.getElementById('newProjectName').value = '';
+    save();
+    renderAll();
+  }
+
+  function deleteProject(id) {
+    if (!confirm('確定刪除此專案及所有待辦事項？')) return;
+    projects = projects.filter(p => p.id !== id);
+    save();
+    renderAll();
+  }
+
+  function openEditModal(id) {
+    const p = projects.find(p => p.id === id);
+    editingProjectId = id;
+    selectedColor = p.color;
+    document.getElementById('editProjectName').value = p.name;
+    renderColorPicker();
+    document.getElementById('editModal').classList.add('show');
+    document.getElementById('editProjectName').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('editModal').classList.remove('show');
+    editingProjectId = null;
+  }
+
+  function saveProject() {
+    const p = projects.find(p => p.id === editingProjectId);
+    const name = document.getElementById('editProjectName').value.trim();
+    if (!name) return;
+    p.name = name;
+    p.color = selectedColor;
+    save();
+    closeModal();
+    renderAll();
+  }
+
+  function renderColorPicker() {
+    const cp = document.getElementById('colorPicker');
+    cp.innerHTML = COLORS.map(c => `
+      <div class="color-dot ${c === selectedColor ? 'selected' : ''}"
+        style="background:${c}"
+        onclick="selectColor('${c}')"></div>
+    `).join('');
+  }
+
+  function selectColor(c) {
+    selectedColor = c;
+    renderColorPicker();
+  }
+
+  function addTodo(projectId) {
+    const input = document.getElementById('todo-input-' + projectId);
+    const sel = document.getElementById('todo-prio-' + projectId);
+    const text = input.value.trim();
+    if (!text) return;
+    const p = projects.find(p => p.id === projectId);
+    p.todos.push({ id: uid(), text, done: false, priority: sel.value });
+    input.value = '';
+    save();
+    renderAll();
+  }
+
+  function toggleTodo(projectId, todoId) {
+    const p = projects.find(p => p.id === projectId);
+    const t = p.todos.find(t => t.id === todoId);
+    t.done = !t.done;
+    save();
+    renderAll();
+  }
+
+  function deleteTodo(projectId, todoId) {
+    const p = projects.find(p => p.id === projectId);
+    p.todos = p.todos.filter(t => t.id !== todoId);
+    save();
+    renderAll();
+  }
+
+  function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderAll();
+  }
+
+  function filterTodos(todos) {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    return todos.filter(t => {
+      if (q && !t.text.toLowerCase().includes(q)) return false;
+      if (currentFilter === 'active') return !t.done;
+      if (currentFilter === 'done') return t.done;
+      if (currentFilter === 'high') return t.priority === 'high';
+      if (currentFilter === 'medium') return t.priority === 'medium';
+      if (currentFilter === 'low') return t.priority === 'low';
+      return true;
+    });
+  }
+
+  function prioLabel(p) {
+    if (p === 'high')   return '<span class="todo-priority p-high">高</span>';
+    if (p === 'medium') return '<span class="todo-priority p-medium">中</span>';
+    return '<span class="todo-priority p-low">低</span>';
+  }
+
+  function renderAll() {
+    const grid = document.getElementById('projectsGrid');
+    const q = document.getElementById('searchInput').value.toLowerCase();
+
+    if (projects.length === 0) {
+      grid.innerHTML = `<div class="no-projects"><span>📂</span>還沒有專案，新增一個開始吧！</div>`;
+      updateStats();
+      return;
+    }
+
+    grid.innerHTML = projects.map(p => {
+      const filtered = filterTodos(p.todos);
+      const total = p.todos.length;
+      const done = p.todos.filter(t => t.done).length;
+      const pct = total ? Math.round(done / total * 100) : 0;
+
+      const todoItems = filtered.length === 0
+        ? `<div class="empty-state">${q ? '沒有符合的待辦' : '還沒有待辦事項'}</div>`
+        : filtered.map(t => `
+          <div class="todo-item">
+            <input type="checkbox" ${t.done ? 'checked' : ''}
+              onchange="toggleTodo('${p.id}','${t.id}')">
+            <span class="todo-text ${t.done ? 'done' : ''}"
+              onclick="toggleTodo('${p.id}','${t.id}')">${escHtml(t.text)}</span>
+            ${prioLabel(t.priority)}
+            <button class="todo-delete" onclick="deleteTodo('${p.id}','${t.id}')" title="刪除">✕</button>
+          </div>
+        `).join('');
+
+      return `
+        <div class="project-card">
+          <div class="project-header">
+            <div class="project-title-row">
+              <div class="project-dot" style="background:${p.color}"></div>
+              <span class="project-name" title="${escHtml(p.name)}">${escHtml(p.name)}</span>
+            </div>
+            <span class="project-progress">${done}/${total}</span>
+            <div class="project-actions">
+              <button class="icon-btn" onclick="openEditModal('${p.id}')" title="編輯">✏️</button>
+              <button class="icon-btn" onclick="deleteProject('${p.id}')" title="刪除">🗑️</button>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${pct}%;background:${p.color}"></div>
+          </div>
+          <div class="todo-list">${todoItems}</div>
+          <div class="add-todo-row">
+            <input type="text" id="todo-input-${p.id}" placeholder="新增待辦..."
+              onkeydown="if(event.key==='Enter') addTodo('${p.id}')">
+            <select id="todo-prio-${p.id}">
+              <option value="medium">中</option>
+              <option value="high">高</option>
+              <option value="low">低</option>
+            </select>
+            <button class="btn-add-todo" onclick="addTodo('${p.id}')">＋</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateStats();
+  }
+
+  function updateStats() {
+    const allTodos = projects.flatMap(p => p.todos);
+    document.getElementById('statProjects').textContent = projects.length;
+    document.getElementById('statTotal').textContent = allTodos.length;
+    document.getElementById('statDone').textContent = allTodos.filter(t => t.done).length;
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // 關閉 modal 點外部
+  document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Enter 儲存 modal
+  document.getElementById('editProjectName').addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveProject();
+  });
+
+  // 初始化 demo 資料
+  if (projects.length === 0) {
+    projects = [
+      {
+        id: uid(), name: 'AI 影像辨識專案', color: '#58a6ff',
+        todos: [
+          { id: uid(), text: '收集訓練資料集', done: true, priority: 'high' },
+          { id: uid(), text: '設計模型架構', done: true, priority: 'high' },
+          { id: uid(), text: '訓練模型並驗證準確率', done: false, priority: 'high' },
+          { id: uid(), text: '撰寫技術文件', done: false, priority: 'medium' },
+        ]
+      },
+      {
+        id: uid(), name: '科內 AI 監測系統', color: '#bc8cff',
+        todos: [
+          { id: uid(), text: '規劃監測指標', done: true, priority: 'high' },
+          { id: uid(), text: '建立 Dashboard', done: false, priority: 'medium' },
+          { id: uid(), text: '設定警報閾值', done: false, priority: 'medium' },
+          { id: uid(), text: '訓練同仁使用', done: false, priority: 'low' },
+        ]
+      },
+      {
+        id: uid(), name: '個人學習', color: '#3fb950',
+        todos: [
+          { id: uid(), text: '閱讀 RSNA 最新論文', done: false, priority: 'medium' },
+          { id: uid(), text: '完成 Python 課程', done: false, priority: 'low' },
+        ]
+      }
+    ];
+    save();
+  }
+
+  renderAll();
+</script>
+</body>
+</html>
