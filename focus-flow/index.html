@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Flow - Ambient Timer for Deep Work</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎧</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <header>
+            <h1>🎧 Focus Flow</h1>
+            <p class="tagline">Deep work, beautiful sounds</p>
+        </header>
+
+        <main>
+            <!-- Timer Section -->
+            <section class="timer-section">
+                <div class="timer-display">
+                    <div class="timer-ring">
+                        <svg viewBox="0 0 200 200">
+                            <circle class="timer-bg" cx="100" cy="100" r="90"/>
+                            <circle class="timer-progress" cx="100" cy="100" r="90"/>
+                        </svg>
+                        <div class="timer-text">
+                            <span id="minutes">25</span>:<span id="seconds">00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timer-presets">
+                    <button class="preset active" data-minutes="25">25 min</button>
+                    <button class="preset" data-minutes="45">45 min</button>
+                    <button class="preset" data-minutes="60">60 min</button>
+                    <button class="preset" data-minutes="5">5 min</button>
+                </div>
+
+                <div class="timer-controls">
+                    <button id="startBtn" class="control-btn primary">
+                        <span class="icon">▶</span> Start
+                    </button>
+                    <button id="pauseBtn" class="control-btn" disabled>
+                        <span class="icon">⏸</span> Pause
+                    </button>
+                    <button id="resetBtn" class="control-btn">
+                        <span class="icon">↻</span> Reset
+                    </button>
+                </div>
+            </section>
+
+            <!-- Ambient Sounds Section -->
+            <section class="sounds-section">
+                <h2>🔊 Ambient Sounds</h2>
+                <p class="sounds-hint">Mix multiple sounds for your perfect focus environment</p>
+                
+                <div class="sound-grid">
+                    <div class="sound-card" data-sound="rain">
+                        <div class="sound-icon">🌧️</div>
+                        <div class="sound-name">Rain</div>
+                        <input type="range" class="volume-slider" min="0" max="100" value="50">
+                        <div class="sound-toggle"></div>
+                    </div>
+
+                    <div class="sound-card" data-sound="thunder">
+                        <div class="sound-icon">⛈️</div>
+                        <div class="sound-name">Thunder</div>
+                        <input type="range" class="volume-slider" min="0" max="100" value="50">
+                        <div class="sound-toggle"></div>
+                    </div>
+
+                    <div class="sound-card" data-sound="forest">
+                        <div class="sound-icon">🌲</div>
+                        <div class="sound-name">Forest</div>
+                        <input type="range" class="volume-slider" min="0" max="100" value="50">
+                        <div class="sound-toggle"></div>
+                    </div>
+
+                    <div class="sound-card" data-sound="ocean">
+                        <div class="sound-icon">🌊</div>
+                        <div class="sound-name">Ocean</div>
+                        <input type="range" class="volume-slider" min="0" max="100" value="50">
+                        <div class="sound-toggle"></div>
+                    </div>
+
+                    <div class="sound-card" data-sound="fire">
+                        <div class="sound-icon">🔥</div>
+                        <div class="sound-name">Fireplace</div>
+                        <input type="range" class="volume-slider" min="0" max="100" value="50">
+                        <div class="sound-toggle"></div>
+                    </div>
+
+                    <div class="sound-card" data-sound="cafe">
+                        <div class="sound-icon">☕</div>
+                        <div class="sound-name">Café</div>
+                        <input type="range" class="volume-slider" min="0" max="100" value="50">
+                        <div class="sound-toggle"></div>
+                    </div>
+
+                    <div class="sound-card" data-sound="wind">
+                        <div class="sound-icon">💨</div>
+                        <div class="sound-name">Wind</div>
+                        <input type="range" class="volume-slider" min="0" max="100" value="50">
+                        <div class="sound-toggle"></div>
+                    </div>
+
+                    <div class="sound-card" data-sound="birds">
+                        <div class="sound-icon">🐦</div>
+                        <div class="sound-name">Birds</div>
+                        <input type="range" class="volume-slider" min="0" max="100" value="50">
+                        <div class="sound-toggle"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats Section -->
+            <section class="stats-section">
+                <h2>📊 Today's Focus</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="sessionsCompleted">0</div>
+                        <div class="stat-label">Sessions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalMinutes">0</div>
+                        <div class="stat-label">Minutes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="currentStreak">0</div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Made with 🎧 for deep work lovers</p>
+        </footer>
+    </div>
+
+    <!-- Notification sound (base64 encoded short beep) -->
+    <audio id="notificationSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1sbJOYo5uQfHN3hpSdoZqNgHt+iJWfoJeLfnqAj5qkoZmLeXmFmKasm4+CgIucq62dhHd7ka20rJB6cYSdrLWshHJ0lK61sYpxa5Cts7aJa2iXtLy3gmNlo7u/t3xfYau/wbZ0WmGywcW0bFRjuMXGr2ZSaL3IxqhgT27Cy8WgWkx0x87DmVNJesvQwJBNR4DO0byIR0WHztK5gEJEjs/TtXg+Q5XQ1LBxOkGc0dSraTdAo9LUpmM0P6rT1KBdMT6x09OaVy4+uNPTlFEsP7/T0o9MKkHF09GJRihIy9PQg0AmT9DT0HtAJFbT1NByPCJd1tTQazkgZNnU0GE2H2vc1c9aMx5x39XOUzAef+HVzEwuHoXj1cxFLB6M5NXKPyoeleXVyDonHp7m1cUzJh+m59XDLSQfr+jVwCciH7jp1b0hIR/B6tW5HB8gzOvVtBceINbr1a8THCDg7NWqDxoh6u3VpQoXIfTu1Z8FFSL+79WZABMjCPDVkwASJBLx1Y0AESUV8dWGABAnF/HVfwARKRnx1XgAEywb8dVxABUvHfHVagAWMh/x1WMAF/Qg8dVcABj1IvHVVQAZ9iTx1U4AGvgm8dVHABv6KPHVQAAc/Crx1TkAHf4s8dUyAB4ALvHVKwAfATDx1SQAIAIy8dUdACEDNPHVFgAiAjbx1Q8AIwI48dUIACQBOvHVAQAlADzx1fsAJgA+8dT0ACcAQPHU7QAoAELx1OYAKQFEz9TfACoGRr/Uzwg=" type="audio/wav">
+    </audio>
+
+    <script src="app.js"></script>
+</body>
+</html>
