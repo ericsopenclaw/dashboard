@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typer Rush - Speed Typing Test</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌨️</text></svg>">
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <header>
+            <h1>⚡ Typer Rush</h1>
+            <p class="tagline">Test your typing speed</p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-value" id="wpm">0</span>
+                <span class="stat-label">WPM</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="accuracy">100</span>
+                <span class="stat-label">Accuracy %</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="timer">60</span>
+                <span class="stat-label">Seconds</span>
+            </div>
+        </div>
+
+        <div class="settings" id="settings">
+            <div class="setting-group">
+                <label>Duration</label>
+                <div class="btn-group">
+                    <button class="btn-option" data-duration="30">30s</button>
+                    <button class="btn-option active" data-duration="60">60s</button>
+                    <button class="btn-option" data-duration="120">120s</button>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label>Difficulty</label>
+                <div class="btn-group">
+                    <button class="btn-option active" data-difficulty="easy">Easy</button>
+                    <button class="btn-option" data-difficulty="medium">Medium</button>
+                    <button class="btn-option" data-difficulty="hard">Hard</button>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label>Category</label>
+                <div class="btn-group">
+                    <button class="btn-option active" data-category="quotes">Quotes</button>
+                    <button class="btn-option" data-category="code">Code</button>
+                    <button class="btn-option" data-category="words">Words</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+
+        <div class="text-display" id="textDisplay">
+            <span class="placeholder">Click Start to begin your typing test!</span>
+        </div>
+
+        <input type="text" class="input-field" id="inputField" placeholder="Start typing here..." disabled autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+        <div class="controls">
+            <button class="btn-primary" id="startBtn">Start Test</button>
+            <button class="btn-secondary" id="restartBtn" style="display: none;">Try Again</button>
+        </div>
+
+        <div class="keyboard" id="keyboard">
+            <div class="keyboard-row">
+                <div class="key" data-key="`">`</div>
+                <div class="key" data-key="1">1</div>
+                <div class="key" data-key="2">2</div>
+                <div class="key" data-key="3">3</div>
+                <div class="key" data-key="4">4</div>
+                <div class="key" data-key="5">5</div>
+                <div class="key" data-key="6">6</div>
+                <div class="key" data-key="7">7</div>
+                <div class="key" data-key="8">8</div>
+                <div class="key" data-key="9">9</div>
+                <div class="key" data-key="0">0</div>
+                <div class="key" data-key="-">-</div>
+                <div class="key" data-key="=">=</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key" data-key="q">Q</div>
+                <div class="key" data-key="w">W</div>
+                <div class="key" data-key="e">E</div>
+                <div class="key" data-key="r">R</div>
+                <div class="key" data-key="t">T</div>
+                <div class="key" data-key="y">Y</div>
+                <div class="key" data-key="u">U</div>
+                <div class="key" data-key="i">I</div>
+                <div class="key" data-key="o">O</div>
+                <div class="key" data-key="p">P</div>
+                <div class="key" data-key="[">[</div>
+                <div class="key" data-key="]">]</div>
+                <div class="key" data-key="\">\</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key" data-key="a">A</div>
+                <div class="key" data-key="s">S</div>
+                <div class="key" data-key="d">D</div>
+                <div class="key" data-key="f">F</div>
+                <div class="key" data-key="g">G</div>
+                <div class="key" data-key="h">H</div>
+                <div class="key" data-key="j">J</div>
+                <div class="key" data-key="k">K</div>
+                <div class="key" data-key="l">L</div>
+                <div class="key" data-key=";">;</div>
+                <div class="key" data-key="'">'</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key" data-key="z">Z</div>
+                <div class="key" data-key="x">X</div>
+                <div class="key" data-key="c">C</div>
+                <div class="key" data-key="v">V</div>
+                <div class="key" data-key="b">B</div>
+                <div class="key" data-key="n">N</div>
+                <div class="key" data-key="m">M</div>
+                <div class="key" data-key=",">,</div>
+                <div class="key" data-key=".">.</div>
+                <div class="key" data-key="/">/</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key space" data-key=" ">Space</div>
+            </div>
+        </div>
+
+        <div class="personal-best" id="personalBest">
+            <span>🏆 Personal Best: </span>
+            <span id="bestWpm">--</span>
+            <span> WPM</span>
+        </div>
+
+        <div class="achievements" id="achievements"></div>
+    </div>
+
+    <div class="modal" id="resultsModal">
+        <div class="modal-content">
+            <h2>🎉 Test Complete!</h2>
+            <div class="results-grid">
+                <div class="result-item">
+                    <div class="result-value" id="finalWpm">0</div>
+                    <div class="result-label">Words Per Minute</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-value" id="finalAccuracy">0%</div>
+                    <div class="result-label">Accuracy</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-value" id="finalChars">0</div>
+                    <div class="result-label">Characters Typed</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-value" id="finalErrors">0</div>
+                    <div class="result-label">Errors</div>
+                </div>
+            </div>
+            <div class="result-message" id="resultMessage"></div>
+            <div class="new-record" id="newRecord" style="display: none;">
+                🏆 NEW PERSONAL BEST! 🏆
+            </div>
+            <div class="earned-badges" id="earnedBadges"></div>
+            <button class="btn-primary" id="closeModal">Try Again</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
